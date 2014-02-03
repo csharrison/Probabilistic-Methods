@@ -1,0 +1,112 @@
+\documentclass[12pt,letterpaper]{article}
+\usepackage{amsmath,amsthm,amsfonts,amssymb,amscd}
+\usepackage{fullpage}
+\usepackage{enumerate}
+\usepackage{fancyhdr}
+\usepackage{mathrsfs}
+\usepackage[margin=3cm]{geometry}
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.05in}
+
+% Edit these as appropriate
+\newcommand\course{CS 155}
+\newcommand\semester{Spring 2014}  % <-- current semester
+\newcommand\asgnname{HW 0}         % <-- assignment name
+\newcommand\yourname{Charles Harrison}  % <-- your name
+\newcommand\login{csharris}          % <-- your CS login
+
+\newenvironment{answer}[1]{
+  \subsubsection*{Problem #1}
+}{\newpage}
+
+\pagestyle{fancyplain}
+\headheight 35pt
+\lhead{\yourname\ (\login)\\\course\ --- \semester}
+\chead{\textbf{\Large Homework \asgnname}}
+\rhead{\today}
+\headsep 10pt
+
+\begin{document}
+
+\begin{answer}{1.18}
+$F : \{0, \ldots , n -1 \} \rightarrow \{0, \ldots, m-1\}$ where
+$$F((x + y) \mod{n}) = (F(x) + F(y)) \mod{n}$$
+
+The algorithm to computer $F(z)$ given a lookup table for $F$ with adversary altering $\frac{1}{5}$ of the entries is as follows:
+\begin{verbatim}
+function computeF(z):
+    x = random.uniform(0, n - 1)
+    y = z - x mod n
+    return (F[x] + F[y]) mod m
+\end{verbatim}
+
+Because there is a $\frac{1}{5}$ chance any given element of $F$ is altered, there is a $\frac{2}{5}$ chance that any two randomly chosen elements ($F[x]$ and $F[y]$) are altered. This means that our algorithm will succeed $\frac{3}{5} > \frac{1}{2}$ of the time.
+\\
+If we can run our initial algorithm 3 times, we can do the following:
+\begin{verbatim}
+    function enhancedComputeF(z):
+        r1 = computeF(z)
+        r2 = computeF(z)
+        r3 = computeF(z)
+        if no r values alike:
+            return random choice of [r1, r2, r3]
+        else:
+            return mode([r1,r2,r3])
+\end{verbatim}
+We take the most occured value if multiple $r$ values are the same, and a random $r$ value if all are different. The probability this result is correct is 
+\begin{align*}
+    P(r = F[z]) &= P(\text{all correct}) + P(\text{2 are correct}) + P(\text{1 is correct and we pick it}) \\
+    P(\text{all correct}) &= \left(\frac{3}{5}\right)^3 = .216\\
+    P(\text{2 correct}) &= {3 \choose 2}\left(\frac{3}{5}\right)^2 \left(\frac{2}{5}\right) = .432\\
+    P(\text{1 correct and we pick it}) &= \left({3 \choose 2}\left(\frac{2}{5}\right)^2\left(\frac{3}{5}\right)\right)(\frac{1}{3} - P(\text{2 wrong answers are the same}))\\
+    &= .288\left(\frac{1}{3} - \frac{2}{n}\right)
+\end{align*}
+$P(\text{2 wrong answers the same}) = \frac{2}{n}$ because for the second wrong answer to equal the first wrong answer, either $x_2 = x_1$ or $x_2 = y_1$, because $x + y \mod n = z$. So the second algorithn
+A hiccup in the analysis is that the adversary can be supremely tricky in making many wrong answers to some $F[z]$ the same, in which case our algorithm will pick two matching wrong answers over a random choice of two wrong answers and a right answer. However for simplicity we will assume he doesn't. Therefore
+\begin{align*}
+    P(r = F[z]) &= P(\text{all correct}) + P(\text{2 are correct}) + P(\text{1 is correct and we pick it}) \\
+    &= .216 + .432 + .288(\frac{1}{3} - \frac{2}{n}) \\
+    &= .744 - \frac{.576}{n}
+\end{align*}
+\end{answer}
+
+\begin{answer}{1.23}
+Claim: there can be at most $\frac{n(n-1)}{2}$ distinct min-cut sets of a graph.\\
+Proof: Recall that $P(\text{finding a specific min-cut}) = \frac{2}{n(n-1)}$. Furthermore, we can stipulate that $P(\text{finding any min-cut}) \le 1$. Let $k$ = the number of min-cut sets. Then
+
+    \begin{align*} P(\text{finding any min-cut}) &= P(\text{finding } C_1) + P(\text{finding } C_2) + \ldots + P(\text{finding } C_k) \\
+    &= k * P(\text{finding a specific } C_i) \\
+    &= \frac{2k}{n(n-1)}\\
+    &\le 1 \intertext{so}
+    k &\le \frac{n(n-1)}{2}
+    \end{align*}
+
+\end{answer}
+\begin{answer}{2.18}
+\emph{Resevoir Sampling} is an algorithm that receives an input stream of data, and maintains a sample of one item with the property that it is uniformly distributed over all the items that we've seen so far. The algorithm works by storing only one element at a time, and when the $k$th item, $x_k$ appears, it replaces the item in memory with probability $\frac{1}{k}$.\\\\
+Analysis: The algorithm correctly maintains the item with uniform distribution. That is, after $k$ steps, the element in memory, $r$, is equally likely to be any of $\{x_1, \ldots, x_k \}$.\\
+Proof by Induction: 
+    \begin{itemize}
+        \item Base case: $k = 1$, then $r = x_1$, and we have a uniform distribution over a single value.
+        \item Inductive step: Assume the value of $r$ is uniformly distributed over all $k-1$ values in the stream, that is
+            $$P(r = x_i) \text{ for } 1 < i < k = \frac{1}{k-1}$$
+        When we read $x_k$, we replace it by $r$ with probability $\frac{1}{k}$ and keep the same value of $r$ with probability $\frac{k-1}{k}$. Thus at step $k$, 
+        \begin{itemize}
+            \item $P(r = x_k) = \frac{1}{k}$
+            \item $P(r = x_i) \text{ for } 0 < i < k = 
+                \left(\frac{1}{k-1}\right)\left(\frac{k-1}{k}\right) = \frac{1}{k}$
+        \end{itemize}
+        Therefore at step $k$ we have $r$ maintaining a uniform distribution over all $k$ items we've seen.
+    \end{itemize}
+    Because the base case holds, and the inductive step holds, the algorithm successfully maintains a uniform distribution over all seen items at every step in the stream.
+\end{answer}
+\begin{answer}{3.7}
+For a stock with price $q$ each day and $r > 1$:
+\begin{itemize}
+    \item $q' = qr$ with probability $p$
+    \item $q' = q/r$ with probability $1 - p$
+\end{itemize}
+Let $X = $
+\end{answer}
+\end{document}
+
