@@ -1,0 +1,69 @@
+\documentclass[12pt,letterpaper]{article}
+\usepackage{amsmath,amsthm,amsfonts,amssymb,amscd}
+\usepackage{fullpage}
+\usepackage{lastpage}
+\usepackage{enumerate}
+\usepackage{fancyhdr}
+\usepackage{mathrsfs}
+\usepackage[margin=3cm]{geometry}
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.05in}
+
+% Edit these as appropriate
+\newcommand\course{CS 155}
+\newcommand\semester{Spring 2014}  % <-- current semester
+\newcommand\asgnname{HW 2}         % <-- assignment name
+\newcommand\yourname{Charles Harrison}  % <-- your name
+\newcommand\login{csharris}          % <-- your CS login
+
+\newenvironment{answer}[1]{
+  \subsubsection*{Problem #1}
+}{\newpage}
+
+\pagestyle{fancyplain}
+\headheight 35pt
+\lhead{\yourname\ (\login)\\\course\ --- \semester}
+\chead{\textbf{\Large Homework \asgnname}}
+\rhead{\today}
+\headsep 10pt
+
+\begin{document}
+
+\begin{answer}{4.3}
+\begin{enumerate}[(a)]
+	\item The moment generating function for the binomial random variable $B(n,p)$ is
+		\begin{align*}
+		M_{B(n,p)}(t) &= E[e^{B(n,p)t}] \\
+			&= \sum_{k=0}^n {n \choose k} p^k(1-p)^{n-k} * e^{kt}\\
+			&= (1 + p(e^t - 1))^n
+		\end{align*}
+	\item Let $X = B(n,p)$ and $Y = B(m, p)$ independent random variables. The moment generating function of $X + Y$ is
+		\begin{align*}
+		M_{X + Y}(t) &= M_X(t)M_Y(t) \text{ by theorem 4.3} \\
+			&= (1 + p(e^t - 1))^n (1 + p(e^t - 1))^m \\
+			&= (1 + p(e^t - 1))^{n + m}
+		\end{align*}
+	\item We can conclude from the form of $M_{X+Y}(t)$ that ...
+\end{enumerate}
+\end{answer}
+
+
+
+
+
+\begin{answer}{4.9}
+	Suppose we obtain independent samples $X_1, X_2, \ldots$ of a random variable $X$ and we want to use these samples to estimate $E[X]$. Using $t$ samples, we use
+		$$ \sum_{i=1}^t X_i$$
+	for our estimate of $E[X]$. We want the estimate to be within $\epsilon E[X]$ from the true value of $E[X]$ with probability at least $1 - \delta$.
+\begin{enumerate}{(a)}
+	\item Claim: $O(\frac{r^2}{\epsilon^2 \delta}$ samples are sufficient.\\ Proof:
+\end{enumerate}
+\end{answer}
+
+
+\begin{answer}{4.10}
+
+\end{answer}
+
+\end{document}
+
