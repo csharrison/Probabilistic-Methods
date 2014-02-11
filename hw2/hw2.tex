@@ -53,16 +53,50 @@
 
 \begin{answer}{4.9}
 	Suppose we obtain independent samples $X_1, X_2, \ldots$ of a random variable $X$ and we want to use these samples to estimate $E[X]$. Using $t$ samples, we use
-		$$ \sum_{i=1}^t X_i$$
-	for our estimate of $E[X]$. We want the estimate to be within $\epsilon E[X]$ from the true value of $E[X]$ with probability at least $1 - \delta$.
-\begin{enumerate}{(a)}
-	\item Claim: $O(\frac{r^2}{\epsilon^2 \delta}$ samples are sufficient.\\ Proof:
+		$$ \mu = \sum_{i=1}^t X_i$$
+	for our estimate of $E[X]$. We want the estimate to be within $\epsilon E[X]$ from the true value of $E[X]$ with probability at least $1 - \delta$. \\
+	Let $r = \frac{\sqrt{Var[X]}}{E[X]}$
+\begin{enumerate}[(a)]
+	\item Claim: $O\left( \frac{ r^2 }{ \epsilon^2 \delta }\right)$ samples are sufficient. \\Proof: by Chebyshev's Inequality, we have
+		\begin{align*}
+			Pr\left( |\mu - E[X]| \ge \epsilon E[X]\right) &\le \frac{V[X]}{\epsilon^2 E[X]^2}\\
+			Pr\left( |\mu - E[X]| \le \epsilon E[X]\right) &\ge \frac{V[X]}{\epsilon^2 E[X]^2}
+		\end{align*}
 \end{enumerate}
 \end{answer}
 
 
 \begin{answer}{4.10}
-
+	A slot machine costs \$1 to play and (independently) yields
+		$$
+		\begin{cases}
+			3 &\mbox{ with probability } \frac{4}{25} \\
+			100 &\mbox{ with probability } \frac{1}{200} \\
+			0 &\mbox{ otherwise}
+		\end{cases}
+		$$
+	The casino is surprised they lost $\$10000$ over the first million games. \\
+	Let $X$ be a random variable taking on how much money the casino makes on the slot machine. Let $X_i$ be random variables taking on how much money the casino makes on the $i$th play. It is clear that
+		\begin{align*}
+			X_i &= \begin{cases}
+					-99 &\mbox{ with probability } \frac{1}{200} \\
+					-2  &\mbox{ with probability } \frac{4}{25} \\
+					1  &\mbox{ with probability } 1 - \frac{1}{200} - \frac{4}{25} = \frac{167}{200}
+				\end{cases}\\
+			X &= \sum_{i = 1}^{1000000} X_i
+			\intertext{We can derive the moment generating function of $X_i$ by}
+			M_{X_i}(t) &= E[e^{X_it}]\\
+				&= \frac{1}{200}e^{-99t} + \frac{4}{25}e^{-2t} + \frac{167}{200}e^t
+			\intertext{Using theorem 4.3 we can say that}
+			M_X(t) &= \prod_{i = 1}^{1000000} M_{X_i}(t)\\
+				&= \left(M_{X_i}(t)\right)^{1000000}
+			\intertext{Using Chernoff Bounds, we can say that}
+			Pr(X \le a) &\le \min_{t < 0} \frac{E[e^{Xt}]}{e^{at}}\\
+			Pr(X \le -10000) &\le \min_{t < 0} \frac{  1 } { e^{-10000t} } \left(\frac{1}{200}e^{-99t} + \frac{4}{25}e^{-2t} + \frac{167}{200}e^t\right)^{1000000}
+			\intertext{Using a very powerful calculator, we find $t = -.0005779$ to yield the minimum, giving us}
+			Pr(X \le -10000) &\le .000159
+		\end{align*}
+		So in reality the casino was pretty unlucky, most likely due to karma.
 \end{answer}
 
 \end{document}
