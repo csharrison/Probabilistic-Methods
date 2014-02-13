@@ -43,7 +43,13 @@
 			&= (1 + p(e^t - 1))^n (1 + p(e^t - 1))^m \\
 			&= (1 + p(e^t - 1))^{n + m}
 		\end{align*}
-	\item We can conclude from the form of $M_{X+Y}(t)$ that ...
+	\item We can conclude from the form of $M_{X+Y}(t)$ that for any collection
+		$$X_1 = B(n_1, p), X_2 = B(n_2, p), \ldots, X_k = B(n_k, p)$$
+
+		 of binomial random variables with the same parameter $p$,
+
+		 $$M_{X_1 + X_2 + \ldots + X_k}(t) = M_{B(n_1 + n_2 + \ldots + n_k, p)}(t)$$
+		 That is, we can use a standin binomial variable with the number of total elements in all the random variables summed to calculate the moment generating function of the sum of random variables.
 \end{enumerate}
 \end{answer}
 
@@ -57,11 +63,44 @@
 	for our estimate of $E[X]$. We want the estimate to be within $\epsilon E[X]$ from the true value of $E[X]$ with probability at least $1 - \delta$. \\
 	Let $r = \frac{\sqrt{Var[X]}}{E[X]}$
 \begin{enumerate}[(a)]
-	\item Claim: $O\left( \frac{ r^2 }{ \epsilon^2 \delta }\right)$ samples are sufficient. \\Proof: by Chebyshev's Inequality, we have
+	\item Claim: $O\left( \frac{ r^2 }{ \epsilon^2 \delta }\right)$ samples are sufficient. \\ Proof:
 		\begin{align*}
-			Pr\left( |\mu - E[X]| \ge \epsilon E[X]\right) &\le \frac{V[X]}{\epsilon^2 E[X]^2}\\
-			Pr\left( |\mu - E[X]| \le \epsilon E[X]\right) &\ge \frac{V[X]}{\epsilon^2 E[X]^2}
+			E[\mu] &= E\left[\sum_{i=1}^t X_i\right] = t E[X_i] = t E[X] \\
+			V[\mu] &= V\left[\sum_{i=1}^t X_i\right] = t V[X_i] = t V[X] \text{ by independence}
+			\intertext{so $V[X] = V[\mu]/t$ and $E[X] = E[\mu]/t$, so use Chebyshev's}
+			Pr\left( \mu/t - E[X] \ge  \epsilon E[X]\right) &= Pr\left( \mu - t E[X] \le  t\epsilon E[X]\right)\\
+				&= Pr\left( \mu - E[\mu] \le  \epsilon E[\mu]\right) \\
+				&\le \frac{V[\mu]}{\epsilon^2 E[\mu]^2} \\
+				&= \frac{tV[X]}{\epsilon^2 t^2 E[X]^2}\\
+				&= \frac{r^2}{t \epsilon^2}
+			\intertext{so we can go back to our original claim, that we need}
+			Pr\left( \mu/t - E[X] \le  \epsilon E[X]\right) &\ge 1 - \delta \\
+			Pr\left( \mu/t - E[X] \le  \epsilon E[X]\right) &= 1 - Pr\left( \mu/t - E[X] \ge  \epsilon E[X]\right) \ge 1 - \delta\\
+			P = Pr\left( \mu/t - E[X] \ge  \epsilon E[X]\right) &\le \delta
 		\end{align*}
+		So if $t = O(\frac{r^2}{\epsilon^2 \delta}) = k\frac{r^2}{\epsilon^2 \delta}$, then $P \le \frac{r^2}{t\epsilon^2}$ implies that $P \le \frac{r^2}{\epsilon^2}*\frac{\epsilon^2}{r^2}\frac{\delta}{k} = \frac{\delta}{k}$, so the claim holds.
+	\item If we only need to be within $\epsilon E[X]$ of $E[X]$ with probability at least 3/4, then we only need $O(\frac{r^2}{\epsilon^2})$ samples. \\
+	Proof: If our probability is at least 3/4, then it means that $1 - \delta = \frac{3}{4}$ so $\delta = \frac{1}{4}$. So then
+		$$ O\left(\frac{r^2}{\epsilon^2 \delta}\right) = O\left(\frac{4r^2}{\epsilon^2}\right) = O\left(\frac{r^2}{\epsilon^2}\right)$$
+
+	\item By taking the median of $n = O(log(\frac{1}{\delta})$ weak estimates, we can obtain an estimate within $\epsilon E[X]$ of $E[X]$ with probability at least $1 - \delta$. Therefore we only need $O\left(\frac{r^2log(1/\delta)}{\epsilon^2}\right) samples$ \\
+	Proof: We know that if more than half of the estimates fall within our bounds then the median will also fall within our bounds. Define a random variable $X_i$
+		$$X_i = \begin{cases}
+			1 &\mbox{ if the $i$th weak estimate is above $\epsilon E[X]$ of $E[X]$}\\
+			0 &\mbox{ otherwise (good case)}
+		\end{cases}$$
+	We know that $Pr(X_i = 0) = \frac{3}{4}$ and $Pr(X_i = 1) = \frac{1}{4}$ (these equalities are approximations). So each $X_i$ is binomial and independent.
+		Let $X = \sum_{i = 1}^n X_i$, we can use a Chernoff bound on $X$! We know that $E[X] = n*E[X_i] = n * \frac{1}{4}$
+		$$ Pr(X  \ge (1 + \alpha)E[X]) \le e^{-E[X]\delta^2 / 3}$$
+		Take $\alpha = 1$
+		so $Pr(X \ge \frac{n}{2}) \le e^{-n/12}$.
+		\\
+		So if we take $n = 12log(\frac{1}{\delta})$ then
+		$$ P(X \ge \frac{n}{2}) \le \delta$$
+		So using $n = 12log(\frac{1}{\delta})$, we can get that the probability more than half of the estimates fall outside our bounds is $\le \delta$, so the probability the median of the estimates satisfies our bounds is $\ge 1- \delta$.
+		Each weak estimate uses $O(\frac{r^2}{\epsilon^2})$ samples and we take $n = O(log(1/\delta))$ samples, so our total samples used is
+		$O(\frac{r^2 log(1/\delta)}{\epsilon^2}$
+
 \end{enumerate}
 \end{answer}
 
@@ -96,7 +135,7 @@
 			\intertext{Using a very powerful calculator, we find $t = -.0005779$ to yield the minimum, giving us}
 			Pr(X \le -10000) &\le .000159
 		\end{align*}
-		So in reality the casino was pretty unlucky, most likely due to karma.
+		So in reality the casino was pretty unlucky, most likely due to karma (or their machines were broken).
 \end{answer}
 
 \end{document}
