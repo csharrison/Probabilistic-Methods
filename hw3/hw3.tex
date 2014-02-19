@@ -1,0 +1,92 @@
+\documentclass[12pt,letterpaper]{article}
+\usepackage{amsmath,amsthm,amsfonts,amssymb,amscd}
+\usepackage{fullpage}
+\usepackage{lastpage}
+\usepackage{enumerate}
+\usepackage{fancyhdr}
+\usepackage{mathrsfs}
+\usepackage[margin=3cm]{geometry}
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.05in}
+
+% Edit these as appropriate
+\newcommand\course{CS 155}
+\newcommand\semester{Spring 2014}  % <-- current semester
+\newcommand\asgnname{HW 3}         % <-- assignment name
+\newcommand\yourname{Charles Harrison}  % <-- your name
+\newcommand\login{csharris}          % <-- your CS login
+
+\newenvironment{answer}[1]{
+  \subsubsection*{Problem #1}
+}{\newpage}
+
+\pagestyle{fancyplain}
+\headheight 35pt
+\lhead{\yourname\ (\login)\\\course\ --- \semester}
+\chead{\textbf{\Large Homework \asgnname}}
+\rhead{\today}
+\headsep 10pt
+
+\begin{document}
+
+\begin{answer}{4.17}
+We have $n$ jobs to distribute among $m$ processors. Let $y = \frac{n}{m}$ be the number of jobs each processor must attend to. Job $i$s number of long ($k$ length) steps can be measured by the independent random variable $X_i$
+
+$$ X_i = \begin{cases}
+	1 &\mbox{ with probability $1-p$}\\
+	0 &\mbox{ with probability $p$}
+\end{cases}$$
+
+Then $X^c = \sum_{i=1}^y X_i$ is the number of long steps the $c$th processor has in its batch of $\frac{n}{m}$ jobs. It is clear that
+	$$ \mu = E[X^c] = E[\sum_{i=1}^y X_i] = \sum_{i=1}^y E[X_i] = y(1-p)p $$
+
+We can bound $X^c$ using a Chernoff Bound derived in Corollary 4.6. For $0 \le \delta \le 1$,
+\begin{align*}
+	Pr(| X^c - \mu | \ge \delta \mu) &\le 2e^{-\mu \delta^2 / 3} \\
+	\intertext{ If we choose $\delta = \frac{1}{2}$, then we get the following bounds}
+	Pr(| X^c - \mu | \ge  \frac{\mu}{2}) &\le 2e^{-\mu / 12} \\
+	Pr(| X^c - \mu | \le  \frac{\mu}{2}) &= 1 - Pr(| X^c - \mu | \ge  \frac{\mu}{2})\\
+		&\ge 1 - 2e^{-\mu / 12} \\
+	\intertext{ But we need \emph{all} processors to fall under this bound, giving us the following (based on independence)}
+	Pr(| X^1 - \mu | \le  \frac{\mu}{2} \cap \ldots \cap | X^m - \mu | \le  \frac{\mu}{2}) &= Pr(| X^1 - \mu | \le  \frac{\mu}{2})*\ldots*Pr(| X^m - \mu | \le  \frac{\mu}{2})\\
+			&= Pr( |X^c - \mu | \le  \frac{\mu}{2})^m\\
+			 &\ge (1 - 2e^{-\mu / 12})^m \\
+\end{align*}
+This bounds the number of long steps each processor will take. It is trivial to transform the number of long steps to the number of total steps. This is left out for the sake of brevity.
+\end{answer}
+\begin{answer}{4.18}
+$$ s(t) = b(t) + \sum_{i =  1}^n p_ib_i(t) $$
+If $s(t)$ is closer to 1 than -1, the receiver assumes that the bit sent at time $t$ was a 1; otherwise, the receiver assumes that it was a -1. Assume that all $b_i(t)$ are independent, uniform random variables. Let $X_i$ = $p_i*b_i(t)$ and $X = \sum_{i=1}^n X_i$. Then
+	\begin{align*}
+	E[e^{tX_i}] &= \frac{1}{2}e^{p_it} + \frac{1}{2}e^{-p_it}\\
+				&= e^{p_i}\left( \frac{1}{2}e^t + \frac{1}{2} e^{-t}  \right)\\
+	E[e^{tX}] &= E\left[ e^{t \sum_{i=1}^n X_i } \right] = E\left[  \prod_{i=1}^n e^{tX_i}  \right]\\
+			  &= \prod_{i=1}^n E[e^{tX_i}] \text{ due to independence of the $X_i$s}\\
+			  &= \prod_{i=1}^n \frac{1}{2}\left(  e^{tp_i} + e^{-tp_i} \right)\\
+			  &= e^{\sum_{i=1}^n p_i} \prod_{i=1}^n \frac{1}{2}\left(  e^t + e^{-t} \right)\\
+			  &\le e^{\sum_{i=1}^n p_i}e^{t^2 n / 2} \text{ by the derivation of theorem 4.7}\\
+	\intertext{So plug these values into a Chernoff Bound}
+	Pr(X \ge a) &\le \frac{E[e^{tX}]}{e^{at}}\\
+				&\le  e^{\sum_{i=1}^n p_i}e^{t^2 n / 2 - at}\\
+				&= e^{\left( \sum_{i=1}^n p_i \right) + \frac{t^2 n}{2} - at}
+    \intertext{To stay parallel to Theorem 4.7 we will set $t = a/n$}
+	Pr(X \ge a) &\le e^{\left( \sum_{i=1}^n p_i \right) - a^2/2n }
+	\intertext{Now set $a = 1$ because that's the point where we'll see interference if b(t) = -1}
+	Pr(X \ge 1) &\le e^{\left( \sum_{i=1}^n p_i \right) - 1/2n }
+	\intertext{And by symmetry}
+	Pr(X \le -1) &\le e^{\left( \sum_{i=1}^n p_i \right) - 1/2n }
+	\intertext{So the probability our signal gets misinterpreted}
+	Pr(\text{signal misinterpreted}) &= Pr((X \le -1 \cap b(t) = 1) \cup (X \ge 1 \cap b(t) = -1))\\
+				&= \frac{1}{2}Pr(X \le -1) + \frac{1}{2}Pr(X \ge 1)\\
+				&\le e^{\left( \sum_{i=1}^n p_i \right) - 1/2n }\\
+	\end{align*}
+
+\end{answer}
+
+\begin{answer}{4.21}
+In order to find a lower bound on this new algorithm, it suffices to show a bottleneck which is guaranteed to happen. Let $S_a,S_b$ be a source node of some packet. Its destination is $S_b,S_a$. Assume the bit fixing algorithm fixes bits from least significant (right-most), to most significant. In this case, bits from $S_b$ will be changed one by one into $S_a$, until the packet is at $S_a,S_a$, then the leftmost bits will be fixed, sending the packet eventually to $S_b,S_a$. \\\\
+
+Because $n$ is even, we know there are $2^{\frac{n}{2}}$ sources which share the same $S_a$ (their $S_b$ can be anything). For each of these packets, after $\frac{n}{2}$ steps, they will \emph{all} be fixed at node $S_a, S_a$. That is, there is a congestion. At node $S_a, S_a$, there will be $2^{\frac{2}{n}}$ packets waiting in its queue, which will take $2^{\frac{2}{n}} = \sqrt{N}$ steps. Therefore, because it takes $\Omega{\sqrt{N}}$ steps to clear the queue at this given node, the entire operation can be said to take at least $\Omega{\sqrt{N}}$ steps to terminate.
+\end{answer}
+
+\end{document}
