@@ -1,0 +1,150 @@
+\documentclass[12pt,letterpaper]{article}
+\usepackage{amsmath,amsthm,amsfonts,amssymb,amscd}
+\usepackage{fullpage}
+\usepackage{lastpage}
+\usepackage{enumerate}
+\usepackage{fancyhdr}
+\usepackage{mathrsfs}
+\usepackage[margin=3cm]{geometry}
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.05in}
+
+% Edit these as appropriate
+\newcommand\course{CS 155}
+\newcommand\semester{Spring 2014}  % <-- current semester
+\newcommand\asgnname{HW 4}         % <-- assignment name
+\newcommand\yourname{Charles Harrison}  % <-- your name
+\newcommand\login{csharris}          % <-- your CS login
+
+\newenvironment{answer}[1]{
+  \subsubsection*{Problem #1}
+}{\newpage}
+
+\pagestyle{fancyplain}
+\headheight 35pt
+\lhead{\yourname\ (\login)\\\course\ --- \semester}
+\chead{\textbf{\Large Homework \asgnname}}
+\rhead{\today}
+\headsep 10pt
+
+\begin{document}
+
+\begin{answer}{1}
+Phase II of the two phase routing process. Claim: the second phase terminates in $O(n)$ steps with probability $1 - N^{-\alpha}$. \\
+Let's redefine some machinery the text does. For a given packet $M$, let $T_2(M)$ be the number of steps for $M$ to finish Phase II. For a given edge $e$ let $X_2(e)$ denote the total number of packets that traverse edge $e$ during Phase II. In each step of Phase II, packet $M$ is either traversing an edge or waiting in a queue while some other packet traverses an edge on $M$s route. Thus, if $e_1, \ldots, e_m$ are the $m \le n$ edges traversed by a packet $M$ in Phase II, then
+	$$T_2(M) \le \sum_{i=1}^m X_2(e_i)$$
+Call any path $P = (e_1,e_2,\ldots, e_m)$ of $m\le n$ edges that follows the bit fixing algorithm a \emph{possible packet path}. Then,
+	$$T_2(P) = \sum_{i=1}^m X_2(e_i)$$
+
+Now, let's fix a possible packet path with $m \le n$ edges. A packet is \emph{active} at node $v_{i-1}$ on the path $P$ if it reaches $v_{i-1}$ and has the possiblity of crossing the correct edge to $v_i$. We call a packet active in general if it is active on any node in our fixed path. \\
+
+For $k = 1, \ldots, N$, let $H_k$ be a 0-1 random variable such that $H_k = 1$ if the packet starting at node $k$ is active on our fixed path, and $H_k = 0$ otherwise. These $H_k$s are independent, because they only depend on the starting location of the packet. Let $H = \sum_{k=1}^N H_k$. We first bound $E[H]$.\\
+
+Consider all active packets at node $v_{i-1} = (b_1, \ldots, b_{j-1}, a_j, \ldots,  a_n)$. Any packet active on this node \emph{must} have started Phase II on any node of the form
+	$$ S = (*, \ldots, *, a_j, \ldots, a_n) $$
+And it must be going to a node with the form
+	$$ D = (b_1, \ldots, b_{j-1}, *, \ldots, *)$$
+
+There are $2^{j-1}$ packets going to a node of the form $D$, and the probability that a node had a source of the form $S$ is $\frac{2^{n-j + 1}}{2^n} = 2^{-(j-1)}$. So the expected number of nodes active at $v_{i-1}$ is 1. We only need to consider the $m$ vertices on our path, so we can therefore bound $E[H]$ as
+	$$ E[H] \le  m * 1 \le n $$
+
+Because $E[H]$ is the sum of 0-1 random variables, we can apply a Chernoff Bound on it.
+	$$ Pr(H \ge 6n \ge 6E[H]) \le 2^{-6n}$$
+Which can then help us derive a bound for $T_2(P)$. We will use the fact that
+	$$Pr(A) = Pr(A | B)Pr(B) + Pr(A | \overline{B})Pr(\overline{B}) \le Pr(B) + Pr(A | \overline{B})$$
+
+Then, for a possible packet path $P$
+\begin{align*}
+	Pr(T_2(P) \ge 30n) &\le Pr(H \ge 6n) + Pr(T_2(P) \ge 30n | H < 6n)\\
+		&\le 2^{-6n} + Pr(T_2(P) \ge 30n | H < 6n)
+\intertext{So if we can prove that}
+		Pr(T_2(P) \ge 30n | H < 6n) \le 3^{-3n - 1}
+\intertext{Then we have}
+		Pr(T_2(P) \ge 30n) \le 2^{-3n}
+\end{align*}
+So we need to bound the conditional probability above, that conditioning on having no more than $6n$ active packets that might use edges of $P$, we need to bound the total number of transitions these packets take through edges of $P$.\\st
+
+We obtain this bound by observing that if a packet leaves the path, it cannot return to the path, because the bit that differs when the packet left the path will never be fixed. It is clear then that at every vertex in the path, a given packet will stay on the path with probability at mo$\frac{1}{2}$. This stage can be seen as a \emph{trial} at $v_i$, where a node must decide to cross the edge to stay on the path $P$. A trial is successful if the packet leaves the path, and a failure if the packet stays on the path. There can be at most $6n$ successful trials, because we have conditioned on there being at most $6n$ active packets on $P$. \\
+
+Let $Z$ be the number of successful trials. We know once there are $6n$ successes we have no more packets that can cross edges on the path. Thus
+	$$ Pr(T_2(P) \ge 30n | H\le 6n) \le Pr(Z \le 6n) \le e^{-18n(2/3)^2 / 2} = e^{-4n} \le 2^{-3n-1}$$
+Therefore we can use what we derived above, that
+	$$ Pr(T_2(P) \ge 30n) \le Pr(H \ge 6n) + Pr(T_2(P) \ge 30n | H \le 6n) \le 2^{-3n}$$
+
+But there are $2^{2n}$ possible packet paths in the hypercube, so the probability that there is any possible packet path for which $T_2(P) \ge 30n$ is bounded by
+	$$2^{2n}2^{-3n} = 2^{-n} = O(N^{-1})$$
+So no packet spends more than $30n$ steps in Phase II with probability $1 - O(N^{-1})$. Thus the runtime of Phase II is $O(30n) = O(n)$.
+\end{answer}
+
+
+
+
+
+
+
+\begin{answer}{5.10}
+Consider throwing $m$ balls into $n$ bins labelled $0$ to $n-1$. There is a $k-gap$ starting at bin $i$ if bins $i,i+1, \ldots,i+k - 1$ are all empty.
+\begin{enumerate}[(a)]
+	\item The expected number of $k-gaps$.
+	\item A Chernoff Bound for the number of $k-gaps$
+\end{enumerate}
+\end{answer}
+
+
+
+
+
+
+
+
+
+
+
+\begin{answer}{5.11}
+Every round, balls are thrown independently and uniformly at random into $n$ bins. Any ball that lands in a bin by itself is \emph{served} and removed from consideration. The remaining balls are thrown again in the next round. Begin with $n$ balls in the first round, and finish when there are no balls left.
+\begin{enumerate}[(a)]
+	\item If there are $b$ balls at the start of a round, the expected value of balls at the start is the expected number of solo balls when there are $b$ balls and $n$ bins. Let $X_i$ be a discrete random variable that is 1 when exactly one ball lands in bin $i$ and 0 otherwise. We can model this with the Poisson distribution with parameter $\mu = \frac{b}{n}$:
+		$$Pr(Y = j) = \frac{e^{-\mu}\mu^j}{j!}$$
+		So $Pr(X_i = 1) = e^{-b/n}(b/n)$. So $E[X_i] = Pr(X_i = 1)$. $E\left[\sum_{i=1}^n X_i\right]$ will give us the expected number of total solo balls.
+		\begin{align*}
+		E\left[\sum_{i=1}^n X_i\right] &= \sum_{i=1}^n E[X_i] \text{ by linearity of expectation}\\
+			&= \sum_{i=1}^n 1 * Pr(X_i = 1) \\
+			&= ne^{-b/n}(b/n) = be^{-b/n}
+		\end{align*}
+	So the expected number of balls at the next round is $b - be^{-b/n} = b(1 - e^{-b/n})$
+	\item Assume that each round, the expected number of balls are served exactly. From part (a) we showed that starting with $b$ balls we expect $be^{-b/n}$ of them to be served in that round. \\
+	Let $x_j$ be the expected number of balls left after $j$ rounds.
+	\begin{itemize}
+		\item Claim: $x_{j+1} \le \frac{x_j^2}{n}$. This follows immediately from the fact that $e^x \ge 1 + x$, so $1 - e^x = -x$. So
+			$$x_{j+1} = x_j(1 - e^{-x_j / n}) \le x_j(\frac{x_j}{n}) = \frac{x_j^2}{n}$$
+
+		\item Claim: The number of steps to serve all the balls is $O(\log{\log{n}})$.
+			\begin{align*}
+			x_1 &= n(1 - \frac{1}{e}) \\
+			x_2 &\le \frac{x_1^2}{n} = n(1 - \frac{1}{e})^2 \\
+			x_3 &\le \frac{x_2^2}{n} = n(1 - \frac{1}{e})^4
+			\intertext{so we can continue this process...}
+			x_t &\le n(1 - \frac{1}{e})^{2^{t-1}} \\
+			\intertext{We know that $e^x \ge 1 + x$, so let $x = -\frac{1}{e}$}
+			x_t &\le n(e^{-1/e})^{2^{t-1}}\\
+				&= ne^{-2^{t-1} / e}
+			\intertext{Let $t$ be our last round, then the second to last round is given by}
+			x_{t} = 0 &= x_{t-1}(1 - e^{-x_{t-1} / n})\\
+			x_{t-1} &= e^{-x_{t-1} / n}
+			\intertext{So plug into our previous result}
+			x_{t-1} = e^{-x_{t-1} / n} &\le ne^{-2^{t-2} / e}
+			\intertext{Take the log of both sides}
+			-\frac{x_{t-1}}{n} &\le \log{n} - \frac{2^{t-2}}{e} \\
+			2^{t-2} &\le e(\log{n} + \frac{x_{t-1}}{n})
+			\intertext{now take the log base 2 of both sides}
+			t - 2 &\le \log_2{(e(\log{n} + \frac{x_{t-1}}{n}))}\\
+			\intertext{we know that $x_{t-1}/n$ is close to 0, so}
+			t &= O(\log{\log{n}})
+			\end{align*}
+			So we finish the process in loglog steps!
+	\end{itemize}
+\end{enumerate}
+\end{answer}
+
+\end{document}
+
