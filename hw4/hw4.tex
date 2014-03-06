@@ -83,10 +83,23 @@ So no packet spends more than $30n$ steps in Phase II with probability $1 - O(N^
 
 
 \begin{answer}{5.10}
-Consider throwing $m$ balls into $n$ bins labelled $0$ to $n-1$. There is a $k-gap$ starting at bin $i$ if bins $i,i+1, \ldots,i+k - 1$ are all empty.
+Consider throwing $m$ balls into $n$ bins labelled $0$ to $n-1$. There is a $k$-gap starting at bin $i$ if bins $i,i+1, \ldots,i+k - 1$ are all empty.
 \begin{enumerate}[(a)]
-	\item The expected number of $k-gaps$.
-	\item A Chernoff Bound for the number of $k-gaps$
+	\item The expected number of $k$-gaps. Let $X_i$ be a random variable that is 1 if there is a $k$-gap starting on bin $i$. It is clear that
+		$$ E[X_i] = 1 * \left( \frac{n - k}{n} \right)^m = (1 - \frac{k}{n})^m  \approx e^{-km/n}$$
+		Then the expected number of $k$-gaps is
+			$$E\left[ \sum_{i=1}^n X_i \right] = \sum_{i=1}^n E[X_i] \approx ne^{-km/n}$$
+	\item Assume for simplicity that $k$ divides $n$. A Chernoff Bound for the number of $k$-gaps can be found by observing that there are $k-1$ equivalence classes of $k$-gap groups. Let us consider one group, where we consider a $k$-gap starting on bins $0, k, 2k, \ldots, n-k$. For each of these bins, consider the same random variable $X_i$ defined above. By this strategy of only considering $k$-gaps grouped $k$ distance from each other, these random variables are independent. So we can derive a Chernoff bound for this class of $k$-gaps, Let $Y_c = \sum_{i=0}^{n/k - 1} X_{ki + c}$ then $Y_0 = \sum_{i = 0}^{n/k} X_{i*k}$, so
+		$$ E[Y_0] = \sum_{i=0}^{n/k - 1} X_{ik} = \frac{n^2}{k}e^{-km/n} = \mu $$
+		So lets derive the Chernoff bound with this expectation
+		$$ Pr(|Y_0 - \mu| \ge \delta \mu) \le 2e^{-\mu \delta^2 / 3} $$
+		The great thing is, this bound works for \emph{any} $Y_c$ equivalence classes of $k$-gaps, because each class is effectively talking about the same problem, just shifted over. So we can bound the total number of $k$-gaps by just putting these all together. We can bound the fact that \emph{all} these classes hold the bound.
+
+		\begin{align*}
+		Pr(|Y_0 - \mu| \ge \delta \mu \cap |Y_1 - \mu | \ge \delta \mu \cap \ldots) &\le Pr(|Y_0 - \mu| \ge \delta \mu)^{n/k}\\
+			&\le \left(2e^{-\mu \delta^2 /3}\right)^{n/k}
+		\end{align*}
+		It suffices to pick an arbitrary $\delta$ to find whatever bound you want.
 \end{enumerate}
 \end{answer}
 
