@@ -1,0 +1,112 @@
+\documentclass[12pt,letterpaper]{article}
+\usepackage{amsmath,amsthm,amsfonts,amssymb,amscd}
+\usepackage{fullpage}
+\usepackage{lastpage}
+\usepackage{enumerate}
+\usepackage{fancyhdr}
+\usepackage{mathrsfs}
+\usepackage[margin=3cm]{geometry}
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.05in}
+
+% Edit these as appropriate
+\newcommand\course{CS 155}
+\newcommand\semester{Spring 2014}  % <-- current semester
+\newcommand\asgnname{HW 5}         % <-- assignment name
+\newcommand\yourname{Charles Harrison}  % <-- your name
+\newcommand\login{csharris}          % <-- your CS login
+
+\newenvironment{answer}[1]{
+  \subsubsection*{Problem #1}
+}{\newpage}
+
+\pagestyle{fancyplain}
+\headheight 35pt
+\lhead{\yourname\ (\login)\\\course\ --- \semester}
+\chead{\textbf{\Large Homework \asgnname}}
+\rhead{\today}
+\headsep 10pt
+
+\begin{document}
+
+\begin{answer}{1}
+For each set $S$ of size $k$, let $X_S = 1$ if $S$ is disconnected, otherwise $X_S = 0$. If the set is disconnected, then every node in $S$ is \emph{not} connected to $T = G / S$. Note that $|T| = n - k$. The probability that $S$ is disconnected is therefore $(1-p)^{k*(n - k)}$, because there are $k (n - k)$ total connections between $S$ and $T$, and there can't be an edge through any of them. Thus
+	$$ E[X] = 1 * (1 - p)^{kn - k^2} $$
+We can then find the expected total number of subsets that are disconnected by
+	$$ \sum_{k=0}^n \sum_{S \in G} E[X_S] = \sum_{k=0}^n {n \choose k} (1 - p)^{kn - k^2}$$
+So using the inequality $1 - x \le e^{-x}$ and the inequality that ${n \choose k} \le \frac{n^k}{k!}$ as well the Taylor Expansion for $e$.
+\begin{align*}
+E[X] &\le \sum_{k=0}^n {n \choose k} e^{-p(kn - k^2)}\\
+	&\le \sum_{k=0}^n \frac{n^k}{k!}e^{-pk(n-k)}\\
+	&\le \sum_{k=0}^n \frac{n^k}{k!}e^{-pkn} \\
+	&\le e^{-np}
+\end{align*}
+So we have bounded the expected number of disconnected subsets. By Markov we have
+$$ Pr(X \ge 1) \le \frac{E[X]}{1} = E[X] $$
+So therefore
+$$ Pr(X < 1) \ge 1 - e^{-np} $$
+So if $p \ge \frac{c \log{n}}{n}$, then
+$$ Pr(X < 1) \ge 1 - e^{-c\log{n}}$$
+
+So in conclusion $Pr(X < 1) \ge 1 - \frac{1}{cn}$ so the claim holds.
+\end{answer}
+
+\begin{answer}{5.21}
+We have $2n$ entries to store $n$ elements in an open addressing scheme.
+\begin{enumerate}[(a)]
+	\item The probability any single insertion takes more than $k$ probe steps is bounded by the probability the $n+1$ insertion takes more than $k$ steps with $n$ elements of the array filled. This is analagous to throwing a ball into a nonempty bin $k$ times. This is formalized as
+		$$Pr(\text{ball lands in a nonempty bin}) \le \frac{1}{2}$$
+		So if we repeat this process $k$ times, we get
+		$$Pr(\text{insertion takes more than $k$ steps}) \le \left( \frac{1}{2} \right)^k = 2^{-k}$$
+
+	\item From part (a) we get that
+		\begin{align*}
+		Pr(X_i > m) \le 2^{-m}
+		\intertext{so plug in $2\log{n}$ for $m$}
+		Pr(X_i > 2\log{n}) \le 2^{-2\log{n}}
+			&= n^{-2} = \frac{1}{n^2}
+		\end{align*}
+
+	\item Let $X_i$ be the number of probes needed by the $i$th insertion. By the above we know that $Pr(X_i > 2\log{n}) \le \frac{1}{n^2}$. Let $X = \max_{1 \le i \le n} X_i$.
+	Then
+		\begin{align*}
+			Pr(X > 2\log{n}) &= Pr(X_1 > 2\log{n} \cup \ldots \cup X_n > 2\log{n})\\
+				&\le n Pr(X_i > 2\log{n}) \\
+				&\le \frac{1}{n}
+		\end{align*}
+	\item From above, we know that
+	\begin{align*}
+		E[X] &= E[X | X \le 2\log{n}]Pr(X \le 2\log{n}) + E[X | X > 2\log{n}]Pr(X > 2\log{n})\\
+			&\le 2\log{n} * 1 + E[X | X > 2\log{n}] \frac{1}{n}\\
+		E[X | X > 2\log{n}] &\le \sum_{i=1}^n E[X_i | X_i > 2\log{n}]\\
+			&\le n(2\log{n} + 2) \text{ by geometric distribution}\\
+		E[X] &= O(\log{n})
+	\end{align*}
+\end{enumerate}
+\end{answer}
+
+\begin{answer}{5.22}
+Let $A$ be the bit array of $X$ and $B$ is the bit array of $Y$. We will use the fact that $P(A) = P(A | B) P(B) + P(A | \overline{B})P(\overline{B})$, so then if we let $X_i$ be the random variable that is 1 if $A_i \ne B_i$ and 0 otherwise. Thus $X = \sum_{i=1}^m X_i$ is the total number of bits that differ in both arrays. We can say that
+\begin{align*}
+	V &= \text{ the event that nothing in $X\cap Y$ hashes to $i$} \\
+	W &= \text{ the event that something in $X\cap Y$ hashes to $i$} = \overline{V} \\
+	E[X_i] &= Pr(X_i = 1) \\
+		&= Pr(X_i = 1 | V)*Pr(V) + Pr(X_i = 1 | W)*Pr(W)
+		\intertext{ but if something in $X\cap Y$ hashes to $i$, we definitely don't have a bit difference, so}
+	Pr(X_i = 1 | W) &= 0
+	\intertext{ So we plug that into our formula for $E[X_i]$}
+	E[X_i] &= Pr(X_i = 1 | V)*Pr(V) \\
+	P(V) &= \left( 1 - \frac{1}{m} \right)^{k |X\cap Y|} \text{ by throwing $k|X\cap Y|$ balls into $m$ bins}
+	Pr(X_i = 1 | V) &= Pr((A_i = 1 \cap B_i = 0) \cup (A_i = 0 \cap B_i = 1)) \\
+			&= 2Pr(A_i = 1)*Pr(B_i = 0) \text{ because of independence}
+			\intertext{This is equivalent to throwing $k(n - |X\cap Y|)$ balls in to $m$ bins}
+			&= 2\left(  1 - \left(1 - \frac{1}{m}\right)^{k(n - |X\cap Y|)}  \right)\left(  1 - \frac{1}{m} \right)^{k(n - |X\cap Y|)}\\
+	E[X_i] &= Pr(X_i = 1 | V)Pr(V) =  2\left(  1 - \left(1 - \frac{1}{m}\right)^{k(n - |X\cap Y|)}  \right) \left(  1 - \frac{1}{m} \right)^{nk}\\
+	E[X] &= \sum_{i=1}^m X_i  = m E[X_i] \text{ by linearity of expectation}\\
+		&= 2m \left(  1 - \left(1 - \frac{1}{m}\right)^{k(n - |X\cap Y|)}  \right) \left(  1 - \frac{1}{m} \right)^{nk}\\
+\end{align*}
+\end{answer}
+
+
+\end{document}
+
