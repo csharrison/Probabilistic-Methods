@@ -1,0 +1,191 @@
+\documentclass[12pt,letterpaper]{article}
+\usepackage{amsmath,amsthm,amsfonts,amssymb,amscd}
+\usepackage{fullpage}
+\usepackage{lastpage}
+\usepackage{enumerate}
+\usepackage{fancyhdr}
+\usepackage{mathrsfs}
+\usepackage[margin=3cm]{geometry}
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.05in}
+
+% Edit these as appropriate
+\newcommand\course{CS 155}
+\newcommand\semester{Spring 2014}  % <-- current semester
+\newcommand\asgnname{HW 7}         % <-- assignment name
+\newcommand\yourname{Charles Harrison}  % <-- your name
+\newcommand\login{csharris}          % <-- your CS login
+
+\newenvironment{answer}[1]{
+  \subsubsection*{Problem #1}
+}{\newpage}
+
+\pagestyle{fancyplain}
+\headheight 35pt
+\lhead{\yourname\ (\login)\\\course\ --- \semester}
+\chead{\textbf{\Large Homework \asgnname}}
+\rhead{\today}
+\headsep 10pt
+
+\begin{document}
+
+\begin{answer}{7.11}
+Claim: the uniform distribution is a stationary distribution for any Markov chain represented by a doubly stochastic matrix $P$. \\
+Proof: A doubly stochastic matrix is ergodic, so it has a unique stationary distribution
+	$$\overline{\pi} = (\pi_0, \ldots, \pi_n)$$
+It suffices to show that
+	$$\pi_i = \sum_{j=0}^n \pi_j P_{j,i} $$
+For the uniform distribution $\pi_i = \pi_j$ and $\sum_{i=1}^n \pi_i = 1$, because then $\overline{\pi}$ is the stationary distribution of $P$. So
+	\begin{align*}
+	\sum_{j=0}^n \pi_j P_{j,i} &= \sum_{j=0}^n \pi_i P_{j,i} \text{ because $\overline{\pi}$ is uniform} \\
+		&= \pi_i \sum_{j=0}^n P_{j,i} \\
+		&= \pi_i \text{ because $P$ is doubly stochastic and column sums add to 1}
+	\end{align*}
+So we know $\overline{\pi}$ is unique, and we've found a suitable one, so the stationary distribution must be uniform.
+\end{answer}
+
+\begin{answer}{7.22}
+A cat and mouse take a independently random walk on a connected, undirected , non bi-partite graph G. They start at the same time on different nodes, and each makes one transition at each time step. The cat eats the mouse if they are ever in the same node at some time step. Let $n$ be the number of vertices of $G$, and $m$ be the number of edges.\\
+Claim: The cat will eat the mouse in $O(m^2 n)$ time steps.\\
+Proof: Consider the Markov chain consisting of ordered pairs $(a,b)$, where $a$ is the location of the cat and $b$ is the position of the mouse. Because there are $n$ nodes in $G$, there are $n^2$ states in this new chain, represented by a transition matrix $P$. For every state $(a,b)$ in the new Markov chain, there are $deg(a)*deg(b)$ edges coming from it, where $a,b$ are nodes in the original graph. Therefore the number of edges in the new Markov chain, $|E|$, can be found by double counting from every vertex:
+	\begin{align*}
+	 2|E| &= \sum_{a=1}^n \sum_{b=1}^n deg((a,b)) \\
+	 	&= \sum_{a=1}^n \sum_{b=1}^n deg(a)*deg(b)\\
+	 	&= \sum_{a=1}^n \left( deg(a) * \sum_{b=1}^n deg(b) \right)\\
+	 	&= \sum_{a=1}^n deg(a) * 2m \\
+	 	&= 4m^2
+	\end{align*}
+Also recall lemma 7.15, which states that
+	$$ h_{v,u} < 2|E| $$
+We want to show that the expected time to go from any state $(i,j)$ to a state $(x,x)$ is $O(m^2 n)$. \\
+Suppose we are at state $(i,j)$ and are observing a possible collision at state $(i,i)$. It suffices to find an $O(n)$ path from $(i,j)$ to $(i,i)$, because by the lemma each step will take less than $2 |E| = 4m^2$, giving us an expected time of $O(m^2 n)$. We will construct the path as follows:
+	\begin{itemize}
+		\item Let the cat move back and forth from position $i$ to a neighbor. Therefore every even step the cat will be at $i$.
+		\item Because the graph is connected, there is a path of size $l \le n$ from $j$ to $i$.
+		\item If $l$ is even, the cat will catch the mouse.
+		\item If $l$ is odd, then the mouse will be at node $i$ when the cat is at the neighbor. However, because the graph is non-bipartite, there exists an odd length path from $i$ to itself. If the mouse takes this path the cat will be at node $i$ when the mouse arrives. The total length of the path the mouse took is bounded by $2n$.
+	\end{itemize}
+	Thus there exists a path of length upper bounded by $O(n)$ from $(i,j)$ to $(i,i)$, and we know that each step of the path will take $2|E| = 4m^2$, so the total time it will take the cat to eat the mouse is upper bounded by $O(n m^2)$
+\end{answer}
+
+\begin{answer}{10.5}
+\begin{enumerate}[(a)]
+\item Let $S_1,S_2,\ldots, S_m$ be subsets of a finite universe $U$. We know the cardinality of all $S_i$ for $1 \le i \le m$. We want an $(\epsilon, \delta)$approximation of the size of
+	$$ S = \bigcup_{i=1}^m S_i $$
+
+We have a procedure that can, in one step, choose an element uniformly at random from a set $S_i$. Also, given an element $x \in U$, we can determine the number of sets $S_i$ for which $x \in S_i$. We will call this number $c(x)$. Let
+	$$p_i = \frac{|S_i|}{\sum_{j=1}^m |S_j|}$$
+The $j$th trial consists of the following steps: We choose a set $S_j$, where the probability of each set $S_i$ being chosen is $p_i$, and then we choose an element $x_j$ uniformly at random from $S_j$. In each trial the random choices are independent of all other trials. After $t$ trials, we estimate $|S|$ by
+	$$ \left(\frac{1}{t}\sum_{j=1}^t \frac{1}{c(x_j)}\right)\left(\sum_{i=1}^m |S_i|\right) $$
+Let $X_1, \ldots, X_t$ be random variables taking on which elements were selected. \\
+Let $K_i = 1/ c(X_i)$.\\
+Let $T = \sum_{j=1}^m |S_j|$.\\
+Let $Y = T/t * \sum_{j=1}^t K_i$. This is our estimate of $|S|$. Let's find its mean!
+
+	\begin{align*}
+		Pr(X_i = x) &= \sum_{S_i | x \in S_i} Pr(\text{$S_i$ selected}) * Pr(x \text{ selected from $S_i$}) \\
+			&= \sum_{S_i | x \in S_i} p_i * \frac{1}{|S_i|} \\
+			&= \sum \frac{1}{T} \\
+			&= \frac{c(x)}{T}
+	\end{align*}
+	\begin{align*}
+		E[K_i] &= E\left[   \frac{1}{c(X_i)}  \right] \\
+			&= \sum_{x \in S} Pr(X_i = x) * \frac{1}{c(x)} \\
+			&= \sum_{x \in S} \frac{1}{T} \\
+			&= \frac{|S|}{T} \\
+		E[Y] &= E\left[  \frac{T}{t} \sum_{j=1}^t K_i  \right] \\
+			&= \frac{T}{t} \sum_{j=1}^t E[K_i] \text{ by linearity of expectation} \\
+			&= \frac{T}{t} \sum_{j=1}^t \frac{|S|}{T} \\
+			&= |S|
+	\end{align*}
+	This confirms that the mean of our estimator is equal to what it \emph{should} be estimating, which is a good first step! Before we can use Theorem 10.1 to show a $(\epsilon, \delta)$ approximation, we need to transform the problem to use indicator variables. Let
+		$$ Q_i = \begin{cases}
+			1 &\mbox{ with probability } 1/c(X_i)\\
+			0 &\mbox{ with probability } 1 - 1/c(X_i)
+		\end{cases}
+		$$
+	Now clearly $E[Q_i | X_i] = 1/c(X_i)$, so
+		$$E[Q_i] = E[E[Q_i | X_i]] = E\left[\frac{1}{c(X_i)}\right] = E[K_i]$$
+
+	Similarly, if we set
+		 $R = T/t \sum_{j=1}^t Q_i $
+	Then
+	$$ E[R] = T/t \sum_{j=1}^t E[Q_i] = E[Y] $$
+
+	So the expectations of these new random variables remain the same. However, the distribution is not the same. The $Q_i$s are only located at the tail of $[0,1]$, rather than dispersed within the range. However, this means that the bound we find on $Q_i$ will be \emph{looser} than the bound on $K_i$, so we can still use it to bound $K_i$. So using Theorem 10.1, we find that we can find that the number of samples for an $(\epsilon, \delta)$ approximation is
+		$$ t \ge \frac{3 \log{2/\delta}}{\epsilon^2 \mu} $$
+	with $\mu = |S| / T$. We can bound this however by noting that
+		$$ \frac{1}{m} \le \frac{|S|}{T} \le 1 $$
+
+	So therefore
+		$$ t \ge \frac{3m \log{2/\delta}}{\epsilon^2} $$
+
+\item Let
+	$$ F = C_1 \vee C_2 \vee \ldots \vee C_t $$
+
+	Let $S_i$ be a solution to $F$ that satisfies the $i$th clause $C_i$. From the text, we know that there are exactly $2^{n-l_i}$ solutions to $C_i$, where $n$ is the number of variables in $F$, and $l_i$ is the number of literals in $C_i$. Thus
+		$$|S_i| = 2^{n - l_i}$$
+	We can then randomize selection by fixing a variable in $S_i$ until $C_i$ is satisfied, and randomly choosing values for the rest of the variables. We can then use part (a) to approximate the size of $S$, which will give us all of the sets of satisfying clauses.
+
+\end{enumerate}
+\end{answer}
+
+
+
+
+
+
+
+
+
+
+
+\begin{answer}{10.8}
+Let $S = \sum_{i=1}^\infty i^{-2} = \pi^2 / 6$. We want a Markov chain based on the Metropolis algorithm on the positive integers, such that, in the stationary distribution,
+	$$ \pi_i = \frac{1}{S i^2} = \frac{6}{\pi^2 i^2}$$
+The neighbors of any integer $i > 1$ in the chain should be only $i-1$ and $i+1$, and the only neighbor of 1 should be 2. \\
+
+We can go about this by modifying the Metropolis algorithm slightly. The Metropolis algorithm is as follows. Let $M$ be any number such that $M \ge \max_{x} |N(x)|$, for any state $x$. Then
+	$$
+	P_{x,y} = \begin{cases}
+		\frac{1}{M} \min(1,\frac{\pi_y}{\pi_x}) &\mbox{ if } x \ne y \text{ and } y \in N(x)\\
+		0 &\mbox{ if } x \ne y \text{ and } y \notin N(x) \\
+		1 - \sum_{y \ne x} P_{x,y}
+	\end{cases}
+	$$
+
+We can alter this slightly by substituting our desired values for $\pi_i$. We also know that $|N(x)| = 2$ for $x > 1$ and $|N(1)| = 1$, so choose $M = 3$.
+	$$
+	P_{x,y} = \begin{cases}
+		\frac{1}{3} \min(1,\frac{ x^2 }{ y^2 }) &\mbox{ if } x = y \pm 1 \\
+		1 - \sum_{y \ne x} P_{x,y} &\mbox{ if } x = y\\
+		0 &\mbox{ otherwise }
+	\end{cases}
+	$$
+
+	This is time reversible, because, given two states $x$ and $y$
+	\begin{itemize}
+	\item If $|x - y| \ne 1$, then $P_{x,y} = P_{y,x} = 0$, so $\pi_x P_{x,y} = \pi_y P_{y,x} = 0$.
+
+	\item If $x = y - 1$, then
+		\begin{align*}
+			P_{y,x} &= \frac{1}{3} \\
+			\pi_x P_{x,y} &= \frac{1}{S x^2} \frac{x^2}{3 y^2}\\
+				&= \frac{1}{S 3 y^2} \\
+				&=  \pi_y P_{y,x}
+		\end{align*}
+
+	\item If $x = y + 1$, then substitute $x$ for $y$ in the above case.
+
+	\item If $x = y$, then trivially $\pi_x P_{x,y} = \pi_y P_{y,x} = \pi_x P_{x,x}$
+	\end{itemize}
+	Furthermore,
+		$$\sum_{i=1}^\infty \frac{1}{i^2} = \frac{\pi^2}{6}$$
+	So clearly
+		$$\sum_{i=1}^\infty \pi_i = 1 $$
+
+	So the stationary distribution of this Markov chain is $(\pi_1, \pi_2, \ldots)$ By theorem 7.10.
+	\end{answer}
+
+\end{document}
+
