@@ -1,0 +1,110 @@
+\documentclass[12pt,letterpaper]{article}
+\usepackage{amsmath,amsthm,amsfonts,amssymb,amscd}
+\usepackage{fullpage}
+\usepackage{lastpage}
+\usepackage{enumerate}
+\usepackage{fancyhdr}
+\usepackage{mathrsfs}
+\usepackage[margin=3cm]{geometry}
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.05in}
+
+% Edit these as appropriate
+\newcommand\course{CS 155}
+\newcommand\semester{Spring 2014}  % <-- current semester
+\newcommand\asgnname{HW 9}         % <-- assignment name
+\newcommand\yourname{Charles Harrison}  % <-- your name
+\newcommand\login{csharris}          % <-- your CS login
+
+\newcommand\p{\frac{1}{6}}
+
+\newenvironment{answer}[1]{
+  \subsubsection*{Problem #1}
+}{\newpage}
+
+\pagestyle{fancyplain}
+\headheight 35pt
+\lhead{\yourname\ (\login)\\\course\ --- \semester}
+\chead{\textbf{\Large Homework \asgnname}}
+\rhead{\today}
+\headsep 10pt
+
+\begin{document}
+
+\begin{answer}{11.2}
+Consider the Markov chain for shuffling cards, where at each step a card is chosen uniformly at random and moved to the top. Suppose that, instead of running the chain for a fixed number of steps, we stop the chain at the first step where every card has been moved to the top at least once. Claim: at this stopping time, the state of the chain is uniformly distributed on the $n!$ possible permutations of the cards.\\\\
+Proof: We couple another Markov chain, $B$ with this one, $A$. Once all the cards in $A$ have been moved to the top at least once, $B$ is fully coupled with $A$. That is, once $A$ and $B$ are fully coupled, the variation distance between $A$ and the uniform distribution is 0, so $A$ is uniformly distributed on the $n!$ possible permutations of cards.
+\end{answer}
+
+
+
+\begin{answer}{11.5}
+Let $X_i$ be the outcome of the $i$th dice roll, and
+	$$Y_j = \left(\sum_{i=1}^j X_i\right) \mod{10}$$
+is the sum of the first $j$ rolls modulo 10. The sequence $Y_j$ forms a Markov chain. There are 10 states in the chain, $[0,9]$ representing what the sum is modulo 10 at step $j$. The transition matrix looks like:
+
+$$
+\left(
+	\begin{array}{cccccccccc}
+	0  & 0  & 0  & 0  & \p & \p & \p & \p & \p & \p \\
+	\p & 0  & 0  & 0  & 0  & \p & \p & \p & \p & \p \\
+	\p & \p & 0  & 0  & 0  & 0  & \p & \p & \p & \p \\
+	\p & \p & \p & 0  & 0  & 0  & 0  & \p & \p & \p \\
+	\p & \p & \p & \p & 0  & 0  & 0  & 0  & \p & \p \\
+	\p & \p & \p & \p & \p & 0  & 0  & 0  & 0  & \p \\
+	\p & \p & \p & \p & \p & \p & 0  & 0  & 0  & 0  \\
+	0  & \p & \p & \p & \p & \p & \p & 0  & 0  & 0  \\
+	0  & 0  & \p & \p & \p & \p & \p & \p & 0  & 0  \\
+	0  & 0  & 0  & \p & \p & \p & \p & \p & \p & 0 \\
+	\end{array}
+\right)
+$$
+Careful observation shows that this transition matrix is doubly stochastic! Doubly stochastic matrixes are aperiod, irreducible, and their stationary distribution is always the uniform distribution, as we proved in homework 7!\\\\
+
+We can bound $\tau(\epsilon)$ by coupling the Markov chain with another Markov chain that evolves independetly until they couple, in which case the second Markov chain evolves the same as the original. We can then consider the second Markov chain to have a state taken from the uniform distribution. Then the probability of coupling at any state is $\frac{1}{10}$. If the chains couple after $T$ steps with probability at least $\epsilon$, then we can use the coupling lemma to show
+	$$ \tau(\epsilon) \le T$$
+
+The probability that the chains couple after $T$ steps is
+	$$\left( \frac{9}{10} \right)^{T-1} \frac{1}{10} = \epsilon$$
+
+\end{answer}
+
+
+\begin{answer}{11.14}
+At each step in a card shuffle, two specific cards are chosen uniformly at random from the deck, and their positions are exchanged.
+\begin{enumerate}[(a)]
+	\item The following is an equivalent process: at each step, a specific card is chosen uniformly at random from the deck, and a position from [1,$n$] is chosen uniformly at random; then the card at position $i$ exchanges position with the specific card chosen. This is trivially equivalent because choosing a card position from [1,$n$] uniformly is exactly equivalent to choosing a card uniformly from the deck. The position is merely a method to label the card chosen.
+
+	\item Couple another deck such that the choices of card and position are the same for both copies of the chain. Let $X_t$ be the number of cards whose positions are different in the two copies of the chain. \\
+	Claim: $X_t$ is nonincreasing over time. \\
+	Proof: At any step $t$, we choose a card $c$ and a position $i$. The card chosen from both decks will be the same card by the coupling rule (though not necessarily in the same position). The position will be the same but the cards at position $i$ may not be the same. Because the swap does not affect the order of any other cards, and the position of card $c$ in both decks will be position $i$ after the step, the worst that can happen is that the cards in position $i$ were the same before the step, and went out of order after the step, causeing $X_t$ to increase by 1. However, this implies that the $c$ cards were not in the same position, so $X_t$ decreases by one when they move to position $i$. Thus in the worst case $X_t$ stays the same.
+
+	\item Claim:
+		$$Pr(X_{t+1} \le X_t - 1 | X_t > 0) \ge \left(\frac{X_t}{n}\right)^2$$
+	In other words, given that the decks are not identically ordered, the probability that a step decreases the number of cards that are in different positions is at least $(X_t/n)^2$. Let deck 1 be labeled $A$ and deck 2 be labeled $B$. Then $A[i], B[i]$ are the cards at position $i$, in deck $A$ and $B$ respectively. \\
+
+
+	Let $c = A[x] = B[y]$ be the card chosen at time $t$, and $C_A = A[i]$ and $C_B = B[i]$ be the cards at position $i$ at time $t$. Assume $X_t > 0$ for simplicity. Then
+
+		\begin{align*}
+			Pr(X_{t+1} < X_t) &= Pr(x \ne y \cap A[i] \ne B[i]) \\
+				&\ge Pr(x \ne y)Pr(A[i] \ne B[i]) \\
+				&= \left(\frac{X_t}{n}\right)^2
+		\end{align*}
+
+	\item Claim: the expected time until $X_t = 0$ is $O(n^2)$ regardless of the starting state of the two chains.\\
+	Proof: Assume $X_0 = n$. At each step we decrease $X_{j + 1} = X_{j} - 1$ with probability greater than $(X_j/n)^2$. So we need $n$ total decreases. Let $Z_j$ be a random variable that counts how many swaps we perform before we decrease the number of differing cards, with $j$ cards different to start with.\\\\
+
+	For example, $Z_n$ = 1, because no cards are the same, and $E[Z] = E[\sum_{j=1}^n Z_i]$ is the expected time until the decks are the same. At $Z_j$
+		 $$ E[Z_j] = \frac{n}{j} $$
+	So
+		$$ E[Z] = \sum_{j=1}^n E[Z_j] = \sum_{j=1}^n \frac{n}{j} = n \sum_{j=1}^n \frac{1}{j} \le n^2 $$
+
+	So $E[Z] = O(n^2)$
+\end{enumerate}
+\end{answer}
+
+
+
+\end{document}
+
