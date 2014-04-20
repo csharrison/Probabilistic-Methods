@@ -1,0 +1,64 @@
+\documentclass[12pt,letterpaper]{article}
+\usepackage{amsmath,amsthm,amsfonts,amssymb,amscd}
+\usepackage{fullpage}
+\usepackage{lastpage}
+\usepackage{enumerate}
+\usepackage{fancyhdr}
+\usepackage{mathrsfs}
+\usepackage[margin=3cm]{geometry}
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.05in}
+
+% Edit these as appropriate
+\newcommand\course{CS 155}
+\newcommand\semester{Spring 2014}  % <-- current semester
+\newcommand\asgnname{HW 10}         % <-- assignment name
+\newcommand\yourname{Charles Harrison}  % <-- your name
+\newcommand\login{csharris}          % <-- your CS login
+
+\newenvironment{answer}[1]{
+  \subsubsection*{Problem #1}
+}{\newpage}
+
+\pagestyle{fancyplain}
+\headheight 35pt
+\lhead{\yourname\ (\login)\\\course\ --- \semester}
+\chead{\textbf{\Large Homework \asgnname}}
+\rhead{\today}
+\headsep 10pt
+
+\newcommand\R{\mathbb{R}}
+\begin{document}
+
+\begin{answer}{1}
+Let $X = \R^2$, and consider the set of concepts $C$ where $c \ in C$ is defined as
+		$$ c = \{(x,y) | x^2 + y^2 \le r^2\} $$
+For some $r \in \R$. $C$ therefore corresponds to the points within a disk of radius $r$ centered at $(0,0)$. We will show $C$ is PAC-learnable from a training data set of size $m \ge \frac{1}{\epsilon}\log{\frac{1}{\delta}}$.\\
+Let our algorithm choose the smallest circle $C'$ that contains all positive examples, with radius $r'$. Then our hypothesis is $h((x,y)) = ^2+ y^2 \le r'^2$. A new example will be misclassified if it falls within the space between $C$ and $C'$, because $C' \subseteq C$. Thus we will misclassify a new point with probability
+	$$ Pr(h(x) \ne c(x)) = \frac{\pi r^2 - \pi r'^2}{\pi r^2} = 1 - \frac{r'^2}{r^2} \le \epsilon$$
+The probability our algorithm gives us these results is given by
+	\begin{align*}
+	Pr(\text{All samples in $C'$}) &= \left(\frac{r'^2}{r^2}\right)^m\\
+		&= 1 - \delta\\
+	1 - \delta &\le (1-\epsilon)^m\\
+	\log{1-\delta} &\le m\log{1-\epsilon}\\
+	m  &\ge \log{1-\delta}/\log{1-\epsilon}\\
+	\end{align*}
+	So $m$ is at least $O(\frac{1}{\epsilon}\log{\frac{1}{\delta}})$
+\end{answer}
+
+\begin{answer}{2}
+Consider the range space $(\R,F)$, where $\R$ is the set of the real numbers, and
+	$$F = \{[a,b]\cup[c,d]  \ |\  \forall a,b,c,d\in \R\}$$
+i.e. each range is the union of two intervals on the reals.
+
+\begin{enumerate}[a)]
+	\item The VC-dimension of $(\R,F)$ is 5. Pick 5 points $[x_1,x_5]$, then the subset $(x_1,x_3,x_5)$ can not be shuttered by $F$ using only two intervals without including $x_2$ and $x_4$. For 4 points we can shutter each subset with two intervals easily.
+	\item The VC-dimension of $F$ with $k$ intervals. We construct a ``worst case'' subset as in part a. Let the ordered sequence of $[x_1, x_n] \in S$ for odd $n$, then let $A = (x_1, x_3, \ldots, x_n-2, x_n) \subset S$. This means we need at least $\frac{n-1}{2} = k$ intervals to cover this specific subset. Therefore
+		$$ n = 2k + 1 $$
+	If $n = 2k$, our ``worst case'' subset would be the subset with the most gaps, $(x_1, x_3, \ldots, x_{n-3}, x_{n-1})$. This is the same as the worst case subset for $n$ odd minus one gap. This yields only $k$ gaps of intervals, which can be easily enclosed with $k$ intervals.
+\end{enumerate}
+\end{answer}
+
+\end{document}
+
